@@ -1,0 +1,46 @@
+/*!
+ * MindPlus
+ * mpython
+ *
+ */
+#include <MPython.h>
+#include <DFRobot_Iot.h>
+// 函数声明
+void obloqMqttEventT0(String& message);
+// 静态常量
+const String topics[5] = {"wo9hciFMg","uR_A5iKGR","","",""};
+const MsgHandleCb msgHandles[5] = {obloqMqttEventT0,NULL,NULL,NULL,NULL};
+// 创建对象
+DFRobot_Iot myIot;
+
+
+// 主程序开始
+void setup() {
+	mPython.begin();
+	myIot.setMqttCallback(msgHandles);
+	display.setCursorLine(1);
+	display.printLine("start");
+	myIot.wifiConnect("lll1", "11112222");
+	while (!myIot.wifiStatus()) {yield();}
+	display.setCursorLine(2);
+	display.printLine("work");
+	myIot.init("iot.dfrobot.com.cn","HQUhcmFMR","","NQUhciKMgz",topics,1883);
+	myIot.connect();
+	while (!myIot.connected()) {yield();}
+	display.setCursorLine(3);
+	display.printLine("ok");
+}
+void loop() {
+	if ((buttonA.isPressed())) {
+		myIot.publish(topic_1, "2018764348 李兆敢");
+	}
+}
+
+
+// 事件回调函数
+void obloqMqttEventT0(String& message) {
+	display.setCursorLine(1);
+	display.printLine(message);
+	rgb.write(0, 0x0000FF);
+	buzz.play(DADADADUM, Once);
+}
