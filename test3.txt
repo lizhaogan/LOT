@@ -1,0 +1,46 @@
+实验一
+void setup() {
+	mPython.begin();
+	myIot.setMqttCallback(msgHandles);
+	display.setCursorLine(1);
+	display.printLine("start");
+	myIot.wifiConnect("lll2", "11112222");
+	while (!myIot.wifiStatus()) {yield();}
+	display.setCursorLine(2);
+	display.printLine("work");
+	display.setCursorLine(3);
+	display.printLine(myIot.getWiFiLocalIP());
+	myIot.init("192.168.43.165","602","","iot", topics, 1883);
+	myIot.connect();
+	while (!myIot.connected()) {yield();}
+	display.setCursorLine(4);
+	display.printLine("ok");
+}
+void loop() {
+	if ((buttonA.isPressed())) {
+		myIot.publish(topic_0, "2018764316卢荣镇");
+		display.setCursorLine(1);
+		display.printLine("发送成功");
+	}
+}
+实验二
+void setup() {
+	mPython.begin();
+	myIot.setMqttCallback(msgHandles);
+	display.fillScreen(0);
+	display.drawImage(39, 7, 50, 50, imageMatrix[0]);
+	myIot.wifiConnect("lll2", "11112222");
+	while (!myIot.wifiStatus()) {yield();}
+	display.fillScreen(0);
+	display.setCursor(0, 0);
+	display.print("WIFI已连接");
+	myIot.init("192.168.43.165","602","","iot", topics, 1883);
+	myIot.connect();
+	while (!myIot.connected()) {yield();}
+	display.fillScreen(0);
+	display.setCursor(0, 0);
+	display.print("连接成功");
+}
+void loop() {
+
+}
