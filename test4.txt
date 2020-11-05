@@ -1,0 +1,24 @@
+void setup() {
+	mPython.begin();
+	myIot.wifiConnect("lll2", "11112222");
+	while (!myIot.wifiStatus()) {yield();}
+	display.setCursorLine(1);
+	display.printLine(myIot.getWiFiLocalIP());
+	mydb.setServerParameter("http://tinywebdb.appinventor.space/api", "lzg666","03d75620");
+	myIot.init("iot.dfrobot.com.cn","bZC15iFGR","","bWC1ciFGRz",topics,1883);
+	myIot.connect();
+	while (!myIot.connected()) {yield();}
+	huskylens.beginI2CUntilSuccess();
+	huskylens.writeAlgorithm(ALGORITHM_FACE_RECOGNITION);
+}
+void loop() {
+	huskylens.request();
+	if (huskylens.isAppearDirect(HUSKYLENSResultBlock)) {
+		mind_n_good = huskylens.readBlockCenterParameterDirect().ID;
+		display.setCursorLine(2);
+		display.printLine(mind_n_good);
+		display.setCursorLine(3);
+		display.printLine(mydb.getTag((dfstring.substring((String(mind_n_good)),0,1,0,1))));
+		myIot.publish(topic_0, mydb.getTag((dfstring.substring((String(mind_n_good)),0,1,0,1))));
+	}
+}
