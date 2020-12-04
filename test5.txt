@@ -1,0 +1,154 @@
+#include <MPython.h>
+#include <DFRobot_Iot.h>
+#include <mPython_tinywebdb.h>
+
+// 动态变量
+String         mind_s_my_string_variable;
+volatile float mind_n_a, mind_n_start, mind_n_stop, mind_n_time, mind_n_s, mind_n_m,
+               mind_n_ms;
+// 函数声明
+void   onButtonAPressed();
+String numberRetain(float t, uint8_t n);
+void   onButtonBPressed();
+void   obloqMqttEventT2(String& message);
+// 静态常量
+const String topics[5] = {"ynB0ciKMg","F6805iFMg","WB2bBFcGg","",""};
+const MsgHandleCb msgHandles[5] = {NULL,NULL,obloqMqttEventT2,NULL,NULL};
+// 创建对象
+DFRobot_Iot       myIot;
+mPython_TinyWebDB mydb;
+
+
+// 主程序开始
+void setup() {
+	mPython.begin();
+	dfrobotRandomSeed();
+	myIot.setMqttCallback(msgHandles);
+	buttonA.setPressedCallback(onButtonAPressed);
+	buttonB.setPressedCallback(onButtonBPressed);
+	display.setCursorLine(1);
+	display.printLine("Mind+");
+	mind_n_a = 1;
+	myIot.wifiConnect("lll", "11112222");
+	while (!myIot.wifiStatus()) {yield();}
+	display.setCursorLine(1);
+	display.printLine("wifi连接成功");
+	myIot.init("iot.dfrobot.com.cn","se705iKMg","","yenAcmKMRz",topics,1883);
+	myIot.connect();
+	while (!myIot.connected()) {yield();}
+	display.setCursorLine(1);
+	display.printLine("mqtt连接成功");
+	mydb.setServerParameter("http://tinywebdb.appinventor.space/api", "lrz797","a46a5f05");
+}
+void loop() {
+
+}
+
+// 事件回调函数
+void onButtonAPressed() {
+	display.fillScreen(0);
+	mind_n_a = 0;
+	mind_n_start = 0;
+	mind_n_stop = 1;
+	mind_n_start = millis();
+	mind_s_my_string_variable = mydb.getTag((String((random(1, 5+1)))));
+	display.setCursorLine(1);
+	display.printLine("题目如下：");
+	display.setCursorLine(2);
+	display.printLine(mind_s_my_string_variable);
+	myIot.publish(topic_0, mind_s_my_string_variable);
+	myIot.publish(topic_1, mind_s_my_string_variable);
+	while (!(0==mind_n_stop)) {
+		delay(200);
+		mind_n_time = ((millis() - mind_n_start) / 1000);
+		mind_n_s = (((int)mind_n_time) % ((int)60));
+		mind_n_m = (((int)(mind_n_time / 60)) % ((int)60));
+		mind_n_ms = (((int)(millis() - mind_n_start)) % ((int)1000));
+		display.setCursorLine(4);
+		display.printLine((String("计时:") + String((String(numberRetain(mind_n_m,0)) + String((String("m") + String((String(numberRetain(mind_n_s,0)) + String((String("s") + String((String(numberRetain(mind_n_ms,0)) + String("ms")))))))))))));
+		yield();
+	}
+	while (!((touchPadT.isTouched()) || (touchPadH.isTouched()))) {yield();}
+	if ((touchPadT.isTouched())) {
+		myIot.publish(topic_1, "回答正确");
+		myIot.publish(topic_0, "回答正确");
+		display.setCursorLine(4);
+		display.printLine("发送成功正确");
+	}
+	else {
+		myIot.publish(topic_1, "回答错误");
+		myIot.publish(topic_0, "回答错误");
+		display.setCursorLine(4);
+		display.printLine("发送成功错误");
+	}
+}
+void onButtonBPressed() {
+	myIot.publish(topic_0, "flag2");
+	myIot.publish(topic_1, "flag2");
+	while (!((touchPadP.isTouched()) || (touchPadY.isTouched()))) {yield();}
+	if ((touchPadP.isTouched())) {
+		myIot.publish(topic_0, "YES");
+		myIot.publish(topic_1, "YES");
+		display.setCursorLine(4);
+		display.printLine("发送成功YES");
+	}
+	else {
+		myIot.publish(topic_0, "NO");
+		myIot.publish(topic_1, "NO");
+		display.setCursorLine(4);
+		display.printLine("发送成功NO");
+	}
+}
+void obloqMqttEventT2(String& message) {
+	if ((String("flag1")==message)) {
+	}
+	else if ((String("flag0")==message)) {
+	}
+	else if ((String("YES")==message)) {
+		display.setCursorLine(4);
+		display.printLine(message);
+	}
+	else if ((String("NO")==message)) {
+		display.setCursorLine(4);
+		display.printLine(message);
+	}
+	else if ((String("正确")==message)) {
+		display.setCursorLine(4);
+		display.printLine(message);
+	}
+	else if ((String("错误")==message)) {
+		display.setCursorLine(4);
+		display.printLine(message);
+	}
+	else {
+		display.fillScreen(0);
+		display.setCursorLine(1);
+		display.printLine("题目如下：");
+		display.setCursorLine(2);
+		display.printLine(message);
+	}
+	if ((0==mind_n_a)) {
+		if ((String("flag1")==message)) {
+			display.setCursorLine(3);
+			display.printLine("2018764312黄晨");
+			mind_n_stop = 0;
+		}
+		else if ((String("flag0")==message)) {
+			display.setCursorLine(3);
+			display.printLine("2018764316卢荣镇");
+			mind_n_stop = 0;
+		}
+		mind_n_a = 1;
+	}
+}
+
+// 静态函数
+String numberRetain(float t, uint8_t n)
+{
+  String t2 = String(t,n+1);
+  if(n<=0){
+    return t2.substring(0,t2.length()-2);
+  }else{
+    return t2.substring(0,t2.length()-1);
+  }
+}
